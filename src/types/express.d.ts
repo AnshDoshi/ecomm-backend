@@ -1,8 +1,11 @@
-// import { User } from "@prisma/client";
-// import express from 'express'
+import { User } from "@prisma/client";
 
-// declare module 'express' {
-//     export interface Request{
-//         user:User
-//     }
-// }
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
+
+export {}; // 💥 Ensures this file is treated as a module

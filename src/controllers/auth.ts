@@ -7,6 +7,7 @@ import { ErrorCode } from "../exceptions/root";
 import { UnprocessEntity } from "../exceptions/validation";
 import { SignUpSchema } from "../schema/users";
 import { NotFoundException } from "../exceptions/not-found";
+import { AuthRequest } from "types/AuthRequest";
 
 export const login = async (
   req: Request,
@@ -27,7 +28,9 @@ export const login = async (
       ErrorCode.INCORRECT_PASSWORD
     );
   }
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!);
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
+    expiresIn: "7d",
+  });
 
   res.json({ user, token });
 };
@@ -41,12 +44,10 @@ export const signup = async (
   const { email, password, name } = req.body;
   let user = await prismaClient.user.findFirst({ where: { email } });
   if (user) {
-     
     return new BadRequestsException(
       "User does exist!",
       ErrorCode.USER_ALREADY_EXISTS
     );
-    
   }
   user = await prismaClient.user.create({
     data: {
@@ -56,4 +57,12 @@ export const signup = async (
     },
   });
   res.json(user);
+};
+
+export const me = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  res.json(req.user);
 };
